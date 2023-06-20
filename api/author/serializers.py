@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import  Author
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Author
         fields = ['id', 'username', 'email']
 
 
@@ -14,7 +14,7 @@ class AuthorLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        user = User.objects.filter(username=data['username']).first()
+        user = Author.objects.filter(username=data['username']).first()
 
         if user and user.check_password(data['password']):
             refresh = RefreshToken.for_user(user)
@@ -28,16 +28,21 @@ class AuthorLoginSerializer(serializers.Serializer):
 
 class AuthorRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    image = serializers.ImageField(write_only=True)
 
     def create(self, validated_data):
-        user = User.objects.create(
+        image = validated_data.pop('image', None)
+        user = Author.objects.create(
             username=validated_data['username'],
-            email=validated_data['email']
+            email=validated_data['email'],
         )
         user.set_password(validated_data['password'])
+
+        if image:
+            user.image = image
         user.save()
         return user
 
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
+        model = Author
+        fields = ['username', 'email', 'password', 'image']
