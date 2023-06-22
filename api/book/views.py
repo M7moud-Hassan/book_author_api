@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.shortcuts import render
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -13,20 +14,11 @@ from .serializers import BookSerializer, PageSerializer
 @api_view(['GET'])
 def book_list(request):
     paginator = PageNumberPagination()
-    paginator.page_size = 10
+    paginator.page_size = 8
     books = Book.objects.all()
     paginated_books = paginator.paginate_queryset(books, request)
     serializer = BookSerializer(paginated_books, many=True)
     return paginator.get_paginated_response(serializer.data)
-
-
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@api_view(['GET'])
-def book_list(request):
-    books = Book.objects.all()
-    serializer = BookSerializer(books, many=True)
-    return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -52,7 +44,7 @@ def book_create(request):
 @api_view(['PUT'])
 def book_update(request, pk):
     book = Book.objects.get(pk=pk)
-    serializer = BookSerializer(book, data=request.data)
+    serializer = BookSerializer(book, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
@@ -68,13 +60,14 @@ def book_delete(request, pk):
     return Response(status=204)
 
 
-# Page API Endpoints
-
 @api_view(['GET'])
-def page_list(request):
-    pages = Pages.objects.all()
-    serializer = PageSerializer(pages, many=True)
-    return Response(serializer.data)
+def page_list(request,pk):
+    paginator = PageNumberPagination()
+    paginator.page_size = 8
+    pages = Pages.objects.filter(book=Book.objects.get(id=pk))
+    paginated_pages = paginator.paginate_queryset(pages, request)
+    serializer = PageSerializer(paginated_pages, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 @api_view(['GET'])
@@ -112,5 +105,6 @@ def page_update(request, pk):
 @api_view(['DELETE'])
 def page_delete(request, pk):
     page = Pages.objects.get(pk=pk)
+    Pages.objects.filter(number__gt=page.number, book=page.book).update(number=F('number') - 1)
     page.delete()
     return Response(status=204)
