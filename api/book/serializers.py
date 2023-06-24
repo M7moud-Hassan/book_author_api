@@ -32,8 +32,8 @@ class BookSerializerView(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        author_data = data.pop('author')  # Remove author from data
-        pages_data = self.get_pages(instance.author)  # Get pages data
+        author_data = data.pop('author')
+        pages_data = self.get_pages(instance.author,data['id'])  # Get pages data
 
         # Merge author and pages data
         data['author'] = author_data
@@ -41,5 +41,5 @@ class BookSerializerView(serializers.ModelSerializer):
 
         return data
 
-    def get_pages(self, author):
-        return PageSerializer(Pages.objects.filter(book__author=author), many=True).data
+    def get_pages(self, author,id):
+        return PageSerializer(Pages.objects.filter(book__author=author,book__id=id), many=True).data
