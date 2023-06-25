@@ -16,7 +16,7 @@
 
 # Book Author Front
 
-Welcome to My Django Project! This is a brief guide on how to set up and run the project locally.
+Welcome to My Django api Project! This is a brief guide on how to set up and run the project locally.
 
 ## Prerequisites
 
