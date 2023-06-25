@@ -59,6 +59,7 @@ MIDDLEWARE = [
 CORS_ORIGIN_ALLOW_ALL = False  # Set it to True to allow all origins, or False to specify a whitelist
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
+    'http://localhost:8000',
 ]
 
 

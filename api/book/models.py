@@ -13,5 +13,5 @@ class Book(models.Model):
 class Pages(models.Model):
     id = models.AutoField
     number = models.PositiveIntegerField()
-    content = models.TextField()
+    content = models.TextField(max_length=600)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
